@@ -24,12 +24,11 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run lifebit-ai/metagwas --study_1 '*_R{1,2}.fastq.gz' --study_2 -profile docker
+    nextflow run main.nf --study_1 testdata/saige_data/saige_results_top_n-1.csv --study_2 testdata/saige_data/saige_results_top_n-2.csv
 
     Mandatory arguments:
       --study_1 [file]                Path to input SAIGE summary statistics (must be surrounded with quotes)
-      -profile [str]                  Configuration profile to use. Can use multiple (comma separated)
-                                      Available: docker
+      --study_2 [file]                Path to input SAIGE summary statistics (must be surrounded with quotes)
 
     """.stripIndent()
 }
@@ -166,50 +165,50 @@ extra_flags = ""
 
 // 1 - METAL options for describing input files
 
-if ( params.FLIP ) { extra_flags += " FLIP " }
+if ( params.flip ) { extra_flags += " FLIP " }
 
 // 2 - METAL options for filtering input files
 
-if ( params.ADDFILTER ) { extra_flags += " ADDFILTER ${params.ADDFILTER}" }
-if ( params.ADDFILTER ) { extra_flags += " REMOVEFILTERS " }
+if ( params.addfilter ) { extra_flags += " ADDFILTER ${params.addfilter}" }
+if ( params.removefilters ) { extra_flags += " REMOVEFILTERS " }
 
 // 3 - METAL options for sample size weighted meta-analysis
 
-if ( params.WEIGHTLABEL ) { extra_flags += " WEIGHTLABEL ${params.WEIGHTLABEL}" }
-if ( params.DEFAULTWEIGHT ) { extra_flags += " DEFAULTWEIGHT ${params.DEFAULTWEIGHT}" }
-if ( params.MINWEIGHT ) { extra_flags += " MINWEIGHT ${params.MINWEIGHT}" }
+if ( params.weightlabel ) { extra_flags += " WEIGHTLABEL ${params.weightlabel}" }
+if ( params.defaultweight ) { extra_flags += " DEFAULTWEIGHT ${params.defaultweight}" }
+if ( params.minweight ) { extra_flags += " MINWEIGHT ${params.minweight}" }
 
 // 4 - METAL options for inverse variance weighted meta-analysis
 
-if ( params.STDERRLABEL ) { extra_flags += " STDERRLABEL ${params.STDERRLABEL}" }
-if ( params.SCHEME ) { extra_flags += " SCHEME ${params.SCHEME}" }
+if ( params.stderrlabel ) { extra_flags += " STDERRLABEL ${params.stderrlabel}" }
+if ( params.scheme ) { extra_flags += " SCHEME ${params.scheme}" }
 
 // 5 - METAL options to enable tracking of allele frequencies
 
-if ( params.AVERAGEFREQ ) { extra_flags += " AVERAGEFREQ ${params.AVERAGEFREQ}" }
-if ( params.MINMAXFREQ ) { extra_flags += " MINMAXFREQ ${params.MINMAXFREQ}" }
-if ( params.FREQLABEL ) { extra_flags += " FREQLABEL ${params.FREQLABEL}" }
+if ( params.averagefreq ) { extra_flags += " AVERAGEFREQ ${params.averagefreq}" }
+if ( params.minmaxfreq ) { extra_flags += " MINMAXFREQ ${params.minmaxfreq}" }
+if ( params.freqlabel ) { extra_flags += " FREQLABEL ${params.freqlabel}" }
 
 // 6 - METAL options to enable tracking of user defined variables
 
-if ( params.CUSTOMVARIABLE ) { extra_flags += " CUSTOMVARIABLE ${params.CUSTOMVARIABLE}" }
-if ( params.LABEL ) { extra_flags += " LABEL ${params.LABEL}" }
+if ( params.customvariable ) { extra_flags += " CUSTOMVARIABLE ${params.customvariable}" }
+if ( params.label ) { extra_flags += " LABEL ${params.label}" }
 
  // 7 - METAL options to enable explicit strand information
 
- if ( params.USESTRAND ) { extra_flags += " USESTRAND ${params.USESTRAND}" }
- if ( params.STRANDLABEL ) { extra_flags += " STRANDLABEL ${params.STRANDLABEL}"  }
+ if ( params.usestrand ) { extra_flags += " USESTRAND ${params.usestrand}" }
+ if ( params.strandlabel ) { extra_flags += " STRANDLABEL ${params.strandlabel}"  }
 
  // 8 - METAL options for automatic genomic control correction of input statistics
 
- if ( params.GENOMICCONTROL ) { extra_flags += " GENOMICCONTROL ${params.GENOMICCONTROL}" }
+ if ( params.genomiccontrol ) { extra_flags += " GENOMICCONTROL ${params.genomiccontrol}" }
 
  // 9 - METAL options for general analysis control  
 
-if ( params.OUTFILE ) { extra_flags += " OUTFILE ${params.OUTFILE}\n" }
-if ( params.MAXWARNINGS ) { extra_flags += " MAXWARNINGS ${params.MAXWARNINGS}" }
-if ( params.VERBOSE ) { extra_flags += " VERBOSE ${params.VERBOSE}"  }
-if ( params.LOGPVALUE ) { extra_flags += " LOGPVALUE ${params.LOGPVALUE}" }
+if ( params.outfile ) { extra_flags += " OUTFILE ${params.outfile}" }
+if ( params.maxwarnings ) { extra_flags += " MAXWARNINGS ${params.maxwarnings}" }
+if ( params.verbose ) { extra_flags += " VERBOSE ${params.verbose}"  }
+if ( params.logpvalue ) { extra_flags += " LOGPVALUE ${params.logpvalue}" }
 
  // 10 - METAL options for general run controlnot available (pipeline is not currently developed to handle this)
 
