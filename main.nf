@@ -218,7 +218,7 @@ if ( params.logpvalue ) { extra_flags += " LOGPVALUE ${params.logpvalue}\n" }
   Running METAL (meta-analysis)
 -------------------------------*/
 
-// add comment
+// This process must be "padded to the wall" to allow for extra flags to be properly inserted
 
 process run_metal {
 publishDir "${params.outdir}", mode: "copy"
