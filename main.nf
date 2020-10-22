@@ -135,3 +135,37 @@ Channel.from(summary.collect{ [it.key, it.value] })
     .set { ch_workflow_summary }
 
 
+
+/*---------------------------
+  Setting up input datasets  
+-----------------------------*/
+
+if (!params.study_1 && !params.study_2) {
+  exit 1, "You have provided not provided 2 studies to run a METAL analysis with. \
+  \nPlease specify 2 studies (SAIGE summary statistics) using --study_1 and --study_2."
+}
+
+Channel
+  .fromPath(params.study_1, checkIfExists: true)
+  .ifEmpty { exit 1, "Study 1 file not found: ${params.study_1}" }
+  .set { study1_ch }
+study1_ch.view()
+
+Channel
+  .fromPath(params.study_2, checkIfExists: true)
+  .ifEmpty { exit 1, "Study 2 file not found: ${params.study_2}" }
+  .set { study2_ch }
+study2_ch.view()
+
+
+
+/*----------------------------
+  Setting up extra METAL flags
+------------------------------*/
+
+
+
+/*-----------------------------
+  Running METAL (meta-analysis)
+-------------------------------*/
+
