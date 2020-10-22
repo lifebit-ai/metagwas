@@ -1,6 +1,6 @@
-# nf-core/metagwas: Documentation
+# lifebit-ai/metagwas: Documentation
 
-The nf-core/metagwas documentation is split into the following pages:
+The lifebit-ai/metagwas documentation is split into the following pages:
 
 <!-- TODO nf-core: If you write more documentation pages, add them to the docs index page here -->
 

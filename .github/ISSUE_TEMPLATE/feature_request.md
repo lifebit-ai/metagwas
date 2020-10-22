@@ -1,5 +1,5 @@
 <!--
-# nf-core/metagwas feature request
+# lifebit-ai/metagwas feature request
 
 Hi there!
 
