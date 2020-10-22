@@ -161,6 +161,58 @@ Channel
   Setting up extra METAL flags
 -------------------------------*/
 
+// Initialise variable to store optional parameters
+extra_flags = ""
+
+// 1 - METAL options for describing input files
+
+if ( params.FLIP ) { extra_flags += " FLIP " }
+
+// 2 - METAL options for filtering input files
+
+if ( params.ADDFILTER ) { extra_flags += " ADDFILTER ${params.ADDFILTER}" }
+if ( params.ADDFILTER ) { extra_flags += " REMOVEFILTERS " }
+
+// 3 - METAL options for sample size weighted meta-analysis
+
+if ( params.WEIGHTLABEL ) { extra_flags += " WEIGHTLABEL ${params.WEIGHTLABEL}" }
+if ( params.DEFAULTWEIGHT ) { extra_flags += " DEFAULTWEIGHT ${params.DEFAULTWEIGHT}" }
+if ( params.MINWEIGHT ) { extra_flags += " MINWEIGHT ${params.MINWEIGHT}" }
+
+// 4 - METAL options for inverse variance weighted meta-analysis
+
+if ( params.STDERRLABEL ) { extra_flags += " STDERRLABEL ${params.STDERRLABEL}" }
+if ( params.SCHEME ) { extra_flags += " SCHEME ${params.SCHEME}" }
+
+// 5 - METAL options to enable tracking of allele frequencies
+
+if ( params.AVERAGEFREQ ) { extra_flags += " AVERAGEFREQ ${params.AVERAGEFREQ}" }
+if ( params.MINMAXFREQ ) { extra_flags += " MINMAXFREQ ${params.MINMAXFREQ}" }
+if ( params.FREQLABEL ) { extra_flags += " FREQLABEL ${params.FREQLABEL}" }
+
+// 6 - METAL options to enable tracking of user defined variables
+
+if ( params.CUSTOMVARIABLE ) { extra_flags += " CUSTOMVARIABLE ${params.CUSTOMVARIABLE}" }
+if ( params.LABEL ) { extra_flags += " LABEL ${params.LABEL}" }
+
+ // 7 - METAL options to enable explicit strand information
+
+ if ( params.USESTRAND ) { extra_flags += " USESTRAND ${params.USESTRAND}" }
+ if ( params.STRANDLABEL ) { extra_flags += " STRANDLABEL ${params.STRANDLABEL}"  }
+
+ // 8 - METAL options for automatic genomic control correction of input statistics
+
+ if ( params.GENOMICCONTROL ) { extra_flags += " GENOMICCONTROL ${params.GENOMICCONTROL}" }
+
+ // 9 - METAL options for general analysis control  
+
+if ( params.OUTFILE ) { extra_flags += " OUTFILE ${params.OUTFILE}\n" }
+if ( params.MAXWARNINGS ) { extra_flags += " MAXWARNINGS ${params.MAXWARNINGS}" }
+if ( params.VERBOSE ) { extra_flags += " VERBOSE ${params.VERBOSE}"  }
+if ( params.LOGPVALUE ) { extra_flags += " LOGPVALUE ${params.LOGPVALUE}" }
+
+ // 10 - METAL options for general run controlnot available (pipeline is not currently developed to handle this)
+
 
 
 /*-----------------------------
@@ -189,6 +241,7 @@ process run_metal {
     PVALUE p.value 
     SEPARATOR COMMA
     PROCESS !{study_1}
+    !{extra_flags}
 
     # === THE SECOND INPUT FILE HAS THE SAME FORMAT AND CAN BE PROCESSED IMMEDIATELY ===
     PROCESS !{study_2}
