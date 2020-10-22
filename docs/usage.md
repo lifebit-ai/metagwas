@@ -15,7 +15,7 @@ This pipeline currently assumes the following:
 The typical command for running the pipeline is as follows:
 
 ```
-nextflow run main.nf -profile docker \
+nextflow run main.nf \
 --study_1 testdata/saige_input/saige_results_top_n-1.csv \
 --study_1 testdata/saige_input/saige_results_top_n-1.csv
 ```
