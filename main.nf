@@ -149,23 +149,58 @@ Channel
   .fromPath(params.study_1, checkIfExists: true)
   .ifEmpty { exit 1, "Study 1 file not found: ${params.study_1}" }
   .set { study1_ch }
-study1_ch.view()
 
 Channel
   .fromPath(params.study_2, checkIfExists: true)
   .ifEmpty { exit 1, "Study 2 file not found: ${params.study_2}" }
   .set { study2_ch }
-study2_ch.view()
 
 
 
-/*----------------------------
+/*-----------------------------
   Setting up extra METAL flags
-------------------------------*/
+-------------------------------*/
 
 
 
 /*-----------------------------
   Running METAL (meta-analysis)
 -------------------------------*/
+
+process run_metal {
+    publishDir "${params.outdir}", mode: "copy"
+
+    input:
+    file study_1 from study1_ch
+    file study_2 from study2_ch
+
+    output:
+    file("METAANALYSIS*") into results_ch
+
+    shell:
+    '''
+    # 1 - Make a METAL script 
+
+    cat > metal_command.txt <<EOF
+    # === DESCRIBE AND PROCESS THE FIRST SAIGE INPUT FILE ===
+    MARKER SNPID
+    ALLELE Allele1 Allele2
+    EFFECT BETA
+    PVALUE p.value 
+    SEPARATOR COMMA
+    PROCESS !{study_1}
+
+    # === THE SECOND INPUT FILE HAS THE SAME FORMAT AND CAN BE PROCESSED IMMEDIATELY ===
+    PROCESS !{study_2}
+
+    ANALYZE 
+    QUIT
+    EOF
+
+    # - Run METAL
+    metal metal_command.txt
+    '''
+
+}
+
 
