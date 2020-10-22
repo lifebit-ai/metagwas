@@ -20,8 +20,8 @@ This pipeline currently assumes the following:
 
     ```
     nextflow run main.nf \
-    --study_1 testdata/saige_input/saige_results_top_n-1.csv \
-    --study_2 testdata/saige_input/saige_results_top_n-2.csv
+    --study_1 testdata/saige_data/saige_results_top_n-1.csv \
+    --study_2 testdata/saige_data/saige_results_top_n-2.csv
     ```
 
 See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
