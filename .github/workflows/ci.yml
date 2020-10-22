@@ -12,7 +12,7 @@ jobs:
   test:
     name: Run workflow tests
     # Only run on push if this is the nf-core dev branch (merged PRs)
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/metagwas') }}
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'lifebit-ai/metagwas') }}
     runs-on: ubuntu-latest
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
@@ -34,13 +34,13 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/metagwas:dev
+        run: docker build --no-cache . -t lifebitai/metagwas:dev
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
         run: |
-          docker pull nfcore/metagwas:dev
-          docker tag nfcore/metagwas:dev nfcore/metagwas:dev
+          docker pull lifebitai/metagwas:dev
+          docker tag lifebitai/metagwas:dev lifebitai/metagwas:dev
 
       - name: Install Nextflow
         run: |

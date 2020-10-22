@@ -4,16 +4,16 @@
   |\\ | |__  __ /  ` /  \\ |__) |__         }  {
   | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
                                         `._,._,'
-  nf-core/metagwas v${version}
+  lifebit-ai/metagwas v${version}
 ----------------------------------------------------
 
 Run Name: $runName
 
 <% if (success){
-    out << "## nf-core/metagwas execution completed successfully! ##"
+    out << "## lifebit-ai/metagwas execution completed successfully! ##"
 } else {
     out << """####################################################
-## nf-core/metagwas execution completed unsuccessfully! ##
+## lifebit-ai/metagwas execution completed unsuccessfully! ##
 ####################################################
 The exit status of the task that caused the workflow execution to fail was: $exitStatus.
 The full error message was:
@@ -36,5 +36,5 @@ Pipeline Configuration:
 <% out << summary.collect{ k,v -> " - $k: $v" }.join("\n") %>
 
 --
-nf-core/metagwas
-https://github.com/nf-core/metagwas
+lifebit-ai/metagwas
+https://github.com/lifebit-ai/metagwas

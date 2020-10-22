@@ -1,5 +1,5 @@
 <!--
-# nf-core/metagwas bug report
+# lifebit-ai/metagwas bug report
 
 Hi there!
 
@@ -38,7 +38,7 @@ Steps to reproduce the behaviour:
 
 - Engine: <!-- [e.g. Conda, Docker or Singularity] -->
 - version: <!-- [e.g. 1.0.0] -->
-- Image tag: <!-- [e.g. nfcore/metagwas:1.0.0] -->
+- Image tag: <!-- [e.g. lifebitai/metagwas:1.0.0] -->
 
 ## Additional context
 

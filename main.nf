@@ -1,11 +1,11 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-                         nf-core/metagwas
+                         lifebit-ai/metagwas
 ========================================================================================
- nf-core/metagwas Analysis Pipeline.
+ lifebit-ai/metagwas Analysis Pipeline.
  #### Homepage / Documentation
- https://github.com/nf-core/metagwas
+ https://github.com/lifebit-ai/metagwas
 ----------------------------------------------------------------------------------------
 */
 
@@ -18,7 +18,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/metagwas --input '*_R{1,2}.fastq.gz' -profile docker
+    nextflow run lifebit-ai/metagwas --input '*_R{1,2}.fastq.gz' -profile docker
 
     Mandatory arguments:
       --input [file]                  Path to input data (must be surrounded with quotes)
@@ -164,8 +164,8 @@ Channel.from(summary.collect{ [it.key, it.value] })
     .map { x -> """
     id: 'nf-core-metagwas-summary'
     description: " - this information is collected when the pipeline is started."
-    section_name: 'nf-core/metagwas Workflow Summary'
-    section_href: 'https://github.com/nf-core/metagwas'
+    section_name: 'lifebit-ai/metagwas Workflow Summary'
+    section_href: 'https://github.com/lifebit-ai/metagwas'
     plot_type: 'html'
     data: |
         <dl class=\"dl-horizontal\">
@@ -276,9 +276,9 @@ process output_documentation {
 workflow.onComplete {
 
     // Set up the e-mail variables
-    def subject = "[nf-core/metagwas] Successful: $workflow.runName"
+    def subject = "[lifebit-ai/metagwas] Successful: $workflow.runName"
     if (!workflow.success) {
-        subject = "[nf-core/metagwas] FAILED: $workflow.runName"
+        subject = "[lifebit-ai/metagwas] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['version'] = workflow.manifest.version
@@ -310,12 +310,12 @@ workflow.onComplete {
         if (workflow.success) {
             mqc_report = ch_multiqc_report.getVal()
             if (mqc_report.getClass() == ArrayList) {
-                log.warn "[nf-core/metagwas] Found multiple reports from process 'multiqc', will use only one"
+                log.warn "[lifebit-ai/metagwas] Found multiple reports from process 'multiqc', will use only one"
                 mqc_report = mqc_report[0]
             }
         }
     } catch (all) {
-        log.warn "[nf-core/metagwas] Could not attach MultiQC report to summary email"
+        log.warn "[lifebit-ai/metagwas] Could not attach MultiQC report to summary email"
     }
 
     // Check if we are only sending emails on failure
@@ -347,7 +347,7 @@ workflow.onComplete {
             if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
             // Try to send HTML e-mail using sendmail
             [ 'sendmail', '-t' ].execute() << sendmail_html
-            log.info "[nf-core/metagwas] Sent summary e-mail to $email_address (sendmail)"
+            log.info "[lifebit-ai/metagwas] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
             // Catch failures and try with plaintext
             def mail_cmd = [ 'mail', '-s', subject, '--content-type=text/html', email_address ]
@@ -355,7 +355,7 @@ workflow.onComplete {
               mail_cmd += [ '-A', mqc_report ]
             }
             mail_cmd.execute() << email_html
-            log.info "[nf-core/metagwas] Sent summary e-mail to $email_address (mail)"
+            log.info "[lifebit-ai/metagwas] Sent summary e-mail to $email_address (mail)"
         }
     }
 
@@ -381,10 +381,10 @@ workflow.onComplete {
     }
 
     if (workflow.success) {
-        log.info "-${c_purple}[nf-core/metagwas]${c_green} Pipeline completed successfully${c_reset}-"
+        log.info "-${c_purple}[lifebit-ai/metagwas]${c_green} Pipeline completed successfully${c_reset}-"
     } else {
         checkHostname()
-        log.info "-${c_purple}[nf-core/metagwas]${c_red} Pipeline completed with errors${c_reset}-"
+        log.info "-${c_purple}[lifebit-ai/metagwas]${c_red} Pipeline completed with errors${c_reset}-"
     }
 
 }
@@ -408,7 +408,7 @@ def nfcoreHeader() {
     ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
     ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
                                             ${c_green}`._,._,\'${c_reset}
-    ${c_purple}  nf-core/metagwas v${workflow.manifest.version}${c_reset}
+    ${c_purple}  lifebit-ai/metagwas v${workflow.manifest.version}${c_reset}
     -${c_dim}--------------------------------------------------${c_reset}-
     """.stripIndent()
 }
