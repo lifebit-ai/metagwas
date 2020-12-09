@@ -50,11 +50,6 @@ if (params.help) {
 
 def summary = [:]
 
-if (workflow.revision) summary['Pipeline Release'] = workflow.revision
-
-summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
-if (workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
-
 summary['Output dir']       = params.outdir
 summary['Launch dir']       = workflow.launchDir
 summary['Working dir']      = workflow.workDir
