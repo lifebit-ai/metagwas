@@ -24,12 +24,12 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run main.nf --study_1 testdata/saige_data/saige_results_top_n-1.csv --study_2 testdata/saige_data/saige_results_top_n-2.csv
+    nextflow run main.nf --studies list-summary-statistics.txt
 
     Mandatory arguments:
-      --study_1                Path to input SAIGE summary statistics (must be surrounded with quotes)
-      --study_2                Path to input SAIGE summary statistics (must be surrounded with quotes)
-
+      --studies           list of studies (GWAS summary statistics) to be analyzed 
+                          (should be a .txt file with the name of each file, one per line)
+  
     """.stripIndent()
 }
 
@@ -56,34 +56,26 @@ summary['Working dir']      = workflow.workDir
 summary['Script dir']       = workflow.projectDir
 summary['User']             = workflow.userName
 
-summary['study_1']          = params.study_1
-summary['study_2']          = params.study_2
+summary['studies']          = params.studies
 
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
 log.info "-\033[2m--------------------------------------------------\033[0m-"
 
 
 
-/*---------------------------
-  Setting up input datasets  
------------------------------*/
-
-if (!params.study_1 && !params.study_2) {
-  exit 1, "You have provided not provided 2 studies to run a METAL analysis with. \
-  \nPlease specify 2 studies (SAIGE summary statistics) using --study_1 and --study_2."
-}
+/*----------------------------------
+  Setting up list of input datasets  
+------------------------------------*/
 
 Channel
-  .fromPath(params.study_1, checkIfExists: true)
-  .ifEmpty { exit 1, "Study 1 file not found: ${params.study_1}" }
-  .set { study1_ch }
+  .fromPath(params.studies, checkIfExists: true)
+  .ifEmpty { exit 1, "List of studies to analyze not found: ${params.studies}" }
+  .splitCsv(header:true)
+  .map{ row -> tuple(row.study, file(row.study)) }
+  .collect()
+  .set { all_input_studies_ch }
 
-Channel
-  .fromPath(params.study_2, checkIfExists: true)
-  .ifEmpty { exit 1, "Study 2 file not found: ${params.study_2}" }
-  .set { study2_ch }
-
-
+all_input_studies_ch.view()
 
 /*-----------------------------
   Setting up extra METAL flags
@@ -139,7 +131,7 @@ if ( params.maxwarnings ) { extra_flags += " MAXWARNINGS ${params.maxwarnings}\n
 if ( params.verbose ) { extra_flags += "VERBOSE ${params.verbose}\n"}
 if ( params.logpvalue ) { extra_flags += " LOGPVALUE ${params.logpvalue}\n" }
 
-// 10 - METAL options for general run controlnot available (pipeline is not currently developed to handle this)
+// 10 - METAL options for general run control not available (pipeline is not currently developed to handle this)
 
 
 
@@ -153,37 +145,31 @@ process run_metal {
 publishDir "${params.outdir}", mode: "copy"
 
 input:
-file study_1 from study1_ch
-file study_2 from study2_ch
+tuple val(studies), file(studies) from all_input_studies_ch
 
 output:
-file("METAANALYSIS*") into results_ch
+//file("METAANALYSIS*") into results_ch
 
-shell:
-'''
-# 1 - Make a METAL script 
-
+script:
+def process_commands = studies.collect {"PROCESS $it "}
+"""
 cat > metal_command.txt <<EOF
-# === DESCRIBE AND PROCESS THE FIRST SAIGE INPUT FILE ===
+# Describe and process the first saige input file
 MARKER SNPID
 ALLELE Allele1 Allele2
 EFFECT BETA
 PVALUE p.value 
 SEPARATOR COMMA
-PROCESS !{study_1}
-!{extra_flags}
-
-# === THE SECOND INPUT FILE HAS THE SAME FORMAT AND CAN BE PROCESSED IMMEDIATELY ===
-PROCESS !{study_2}
+${extra_flags}
+${process_commands}
 
 ANALYZE 
 QUIT
 EOF
 
-# - Run METAL
+# Run METAL
 metal metal_command.txt
-'''
-
+"""
 }
 
 
