@@ -1,17 +1,27 @@
-FROM lifebitai/base:1.10.2
-LABEL authors="Magda Meier" \
-      description="Docker image containing all software requirements for the lifebit-ai/metagwas pipeline"
+FROM continuumio/miniconda3@sha256:456e3196bf3ffb13fee7c9216db4b18b5e6f4d37090b31df3e0309926e98cfe2
 
-# Install the conda environment
+LABEL description="Docker image containing all requirements for lifebit-ai/metagwas" \
+      author="magda@lifebit.ai"
+
+RUN apt-get update -y  \ 
+    && apt-get install -y wget zip procps \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY environment.yml /
-RUN conda env create --quiet -f /environment.yml && conda clean -a
+RUN conda env create -f /environment.yml && conda clean -a
+ENV PATH /opt/conda/envs/metagwas/bin:$PATH
 
-# Add conda installation dir to PATH (instead of doing 'conda activate')
-ENV PATH /opt/conda/envs/nf-core-metagwas-1.0dev/bin:$PATH
+# Install METAL
+RUN wget http://csg.sph.umich.edu/abecasis/Metal/download/Linux-metal.tar.gz \
+    && tar -xzvf Linux-metal.tar.gz \
+    && rm Linux-metal.tar.gz
 
-# Dump the details of the installed packages to a file for posterity
-RUN conda env export --name nf-core-metagwas-1.0dev > nf-core-metagwas-1.0dev.yml
+ENV PATH /generic-metal:$PATH
 
-# Instruct R processes to use these empty files instead of clashing with a local version
-RUN touch .Rprofile
-RUN touch .Renviron
+USER root
+
+WORKDIR /data/
+
+CMD ["bash"]
+
+
