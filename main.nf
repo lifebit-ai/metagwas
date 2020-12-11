@@ -151,7 +151,6 @@ output:
 //file("METAANALYSIS*") into results_ch
 
 shell:
-def process_commands = studies.collect {"PROCESS $it "}
 '''
 1 - Dynamically obtain files to process
 
