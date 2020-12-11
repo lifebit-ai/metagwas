@@ -145,14 +145,14 @@ process run_metal {
 publishDir "${params.outdir}", mode: "copy"
 
 input:
-tuple val(studies), file(studies) from all_input_studies_ch
+file(study) from all_input_studies_ch.collect()
 
 output:
-//file("METAANALYSIS*") into results_ch
+file("METAANALYSIS*") into results_ch
 
 shell:
 '''
-1 - Dynamically obtain files to process
+# 1 - Dynamically obtain files to process
 
 touch process_commands.txt
 
@@ -163,7 +163,7 @@ done
 
 process_commands=$(cat process_commands.txt)
 
-2 - Make METAL script 
+# 2 - Make METAL script 
 
 cat > metal_command.txt <<EOF
 # Describe and process the first saige input file
