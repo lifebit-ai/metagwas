@@ -27,8 +27,8 @@ def helpMessage() {
     nextflow run main.nf --studies list-summary-statistics.csv
 
     Mandatory arguments:
-      --studies           list of studies (GWAS summary statistics) to be analyzed 
-                          (should be a .csv file with a header and the name of each file, one per line)
+    --studies           list of studies (GWAS summary statistics) to be analyzed 
+                        (should be a .csv file with a header and the name of each file, one per line)
   
     """.stripIndent()
 }
