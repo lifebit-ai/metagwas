@@ -24,7 +24,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run main.nf --studies list-summary-statistics.txt
+    nextflow run main.nf --studies list-summary-statistics.csv
 
     Mandatory arguments:
       --studies           list of studies (GWAS summary statistics) to be analyzed 
@@ -71,11 +71,11 @@ Channel
   .fromPath(params.studies, checkIfExists: true)
   .ifEmpty { exit 1, "List of studies to analyze not found: ${params.studies}" }
   .splitCsv(header:true)
-  .map{ row -> tuple(row.study, file(row.study)) }
-  .collect()
+  .map{ row -> file(row.study) }
+  .flatten()
   .set { all_input_studies_ch }
 
-all_input_studies_ch.view()
+
 
 /*-----------------------------
   Setting up extra METAL flags
@@ -150,9 +150,22 @@ tuple val(studies), file(studies) from all_input_studies_ch
 output:
 //file("METAANALYSIS*") into results_ch
 
-script:
+shell:
 def process_commands = studies.collect {"PROCESS $it "}
-"""
+'''
+1 - Dynamically obtain files to process
+
+touch process_commands.txt
+
+for csv in $(ls *.csv)
+do 
+echo "PROCESS $csv " >> process_commands.txt
+done
+
+process_commands=$(cat process_commands.txt)
+
+2 - Make METAL script 
+
 cat > metal_command.txt <<EOF
 # Describe and process the first saige input file
 MARKER SNPID
@@ -160,16 +173,17 @@ ALLELE Allele1 Allele2
 EFFECT BETA
 PVALUE p.value 
 SEPARATOR COMMA
-${extra_flags}
-${process_commands}
+$process_commands
+!{extra_flags}
 
 ANALYZE 
 QUIT
 EOF
 
-# Run METAL
+# 3 - Run METAL
+
 metal metal_command.txt
-"""
+'''
 }
 
 
