@@ -28,7 +28,7 @@ def helpMessage() {
 
     Mandatory arguments:
       --studies           list of studies (GWAS summary statistics) to be analyzed 
-                          (should be a .txt file with the name of each file, one per line)
+                          (should be a .csv file with a header and the name of each file, one per line)
   
     """.stripIndent()
 }
@@ -158,7 +158,7 @@ touch process_commands.txt
 
 for csv in $(ls *.csv)
 do 
-echo "PROCESS $csv " >> process_commands.txt
+echo "PROCESS $csv" >> process_commands.txt
 done
 
 process_commands=$(cat process_commands.txt)
@@ -166,7 +166,6 @@ process_commands=$(cat process_commands.txt)
 # 2 - Make METAL script 
 
 cat > metal_command.txt <<EOF
-# Describe and process the first saige input file
 MARKER SNPID
 ALLELE Allele1 Allele2
 EFFECT BETA
