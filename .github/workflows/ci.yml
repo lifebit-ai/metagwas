@@ -18,4 +18,8 @@ jobs:
       - name: Basic METAL run
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile basic_test
+      - name: Basic METAL run with extra flags
+        run : |
+          nextflow run ${GITHUB_WORKSPACE} -profile flags_test
+
 
