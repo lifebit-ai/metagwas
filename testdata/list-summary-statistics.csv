@@ -1,4 +1,4 @@
 study
-testdata/saige_results_top_n-1.csv
-testdata/saige_results_top_n-2.csv
-testdata/saige_results_top_n-3.csv
+s3://testdata-magda/metagwas/test-studies/saige_results_top_n-1.csv
+s3://testdata-magda/metagwas/test-studies/saige_results_top_n-2.csv
+s3://testdata-magda/metagwas/test-studies/saige_results_top_n-3.csv
