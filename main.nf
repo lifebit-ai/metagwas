@@ -171,8 +171,9 @@ ALLELE Allele1 Allele2
 EFFECT BETA
 PVALUE p.value 
 SEPARATOR COMMA
-$process_commands
 !{extra_flags}
+$process_commands
+
 
 ANALYZE 
 QUIT
