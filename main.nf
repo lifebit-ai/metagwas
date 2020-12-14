@@ -24,7 +24,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run main.nf --studies list-summary-statistics.csv
+    nextflow run main.nf --studies testdata/list-summary-statistics.csv
 
     Mandatory arguments:
     --studies           list of studies (GWAS summary statistics) to be analyzed 
