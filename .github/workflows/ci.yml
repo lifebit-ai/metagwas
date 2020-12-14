@@ -17,5 +17,5 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Basic METAL run
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test
+          nextflow run ${GITHUB_WORKSPACE} -profile basic_test
 
