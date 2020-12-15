@@ -86,50 +86,50 @@ extra_flags = ""
 
 // 1 - METAL options for describing input files
 
-if ( params.flip ) { extra_flags += " FLIP \n" }
+if ( params.flip ) { extra_flags += "FLIP \n" }
 
 // 2 - METAL options for filtering input files
 
-if ( params.addfilter ) { extra_flags += " ADDFILTER ${params.addfilter}\n" }
-if ( params.removefilters ) { extra_flags += " REMOVEFILTERS  \n" }
+if ( params.addfilter ) { extra_flags += "ADDFILTER ${params.addfilter}\n" }
+if ( params.removefilters ) { extra_flags += "REMOVEFILTERS  \n" }
 
 // 3 - METAL options for sample size weighted meta-analysis
 
-if ( params.weightlabel ) { extra_flags += " WEIGHTLABEL ${params.weightlabel}\n" }
-if ( params.defaultweight ) { extra_flags += " DEFAULTWEIGHT ${params.defaultweight}\n" }
-if ( params.minweight ) { extra_flags += " MINWEIGHT ${params.minweight}\n" }
+if ( params.weightlabel ) { extra_flags += "WEIGHTLABEL ${params.weightlabel}\n" }
+if ( params.defaultweight ) { extra_flags += "DEFAULTWEIGHT ${params.defaultweight}\n" }
+if ( params.minweight ) { extra_flags += "MINWEIGHT ${params.minweight}\n" }
 
 // 4 - METAL options for inverse variance weighted meta-analysis
 
-if ( params.stderrlabel ) { extra_flags += " STDERRLABEL ${params.stderrlabel}\n" }
-if ( params.scheme ) { extra_flags += " SCHEME ${params.scheme}\n" }
+if ( params.stderrlabel ) { extra_flags += "STDERRLABEL ${params.stderrlabel}\n" }
+if ( params.scheme ) { extra_flags += "SCHEME ${params.scheme}\n" }
 
 // 5 - METAL options to enable tracking of allele frequencies
 
-if ( params.averagefreq ) { extra_flags += " AVERAGEFREQ ${params.averagefreq}\n" }
-if ( params.minmaxfreq ) { extra_flags += " MINMAXFREQ ${params.minmaxfreq}\n" }
-if ( params.freqlabel ) { extra_flags += " FREQLABEL ${params.freqlabel}\n" }
+if ( params.averagefreq ) { extra_flags += "AVERAGEFREQ ${params.averagefreq}\n" }
+if ( params.minmaxfreq ) { extra_flags += "MINMAXFREQ ${params.minmaxfreq}\n" }
+if ( params.freqlabel ) { extra_flags += "FREQLABEL ${params.freqlabel}\n" }
 
 // 6 - METAL options to enable tracking of user defined variables
 
-if ( params.customvariable ) { extra_flags += " CUSTOMVARIABLE ${params.customvariable}\n" }
-if ( params.label ) { extra_flags += " LABEL ${params.label}\n" }
+if ( params.customvariable ) { extra_flags += "CUSTOMVARIABLE ${params.customvariable}\n" }
+if ( params.label ) { extra_flags += "LABEL ${params.label}\n" }
 
 // 7 - METAL options to enable explicit strand information
 
-if ( params.usestrand ) { extra_flags += " USESTRAND ${params.usestrand}\n" }
-if ( params.strandlabel ) { extra_flags += " STRANDLABEL ${params.strandlabel}\n"  }
+if ( params.usestrand ) { extra_flags += "USESTRAND ${params.usestrand}\n" }
+if ( params.strandlabel ) { extra_flags += "STRANDLABEL ${params.strandlabel}\n"  }
 
 // 8 - METAL options for automatic genomic control correction of input statistics
 
-if ( params.genomiccontrol ) { extra_flags += " GENOMICCONTROL ${params.genomiccontrol}\n" }
+if ( params.genomiccontrol ) { extra_flags += "GENOMICCONTROL ${params.genomiccontrol}\n" }
 
 // 9 - METAL options for general analysis control  
 
 if ( params.outfile ) { extra_flags += "OUTFILE ${params.outfile}\n"}
-if ( params.maxwarnings ) { extra_flags += " MAXWARNINGS ${params.maxwarnings}\n" }
+if ( params.maxwarnings ) { extra_flags += "MAXWARNINGS ${params.maxwarnings}\n" }
 if ( params.verbose ) { extra_flags += "VERBOSE ${params.verbose}\n"}
-if ( params.logpvalue ) { extra_flags += " LOGPVALUE ${params.logpvalue}\n" }
+if ( params.logpvalue ) { extra_flags += "LOGPVALUE ${params.logpvalue}\n" }
 
 // 10 - METAL options for general run control not available (pipeline is not currently developed to handle this)
 
@@ -171,8 +171,9 @@ ALLELE Allele1 Allele2
 EFFECT BETA
 PVALUE p.value 
 SEPARATOR COMMA
-$process_commands
 !{extra_flags}
+$process_commands
+
 
 ANALYZE 
 QUIT
