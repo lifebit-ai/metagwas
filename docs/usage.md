@@ -13,7 +13,7 @@ This pipeline currently assumes all the studies are formatted as SAIGE output fi
 The typical command for running the pipeline is as follows:
 
 ```
-nextflow run main.nf --studies https://testdata-magda.s3-eu-west-1.amazonaws.com/metagwas/list-summary-statistics.csv
+nextflow run main.nf --studies https://lifebit-featured-datasets.s3-eu-west-1.amazonaws.com/projects/gel/metagwas/list-summary-statistics.csv
 ```
 
 ## 4 - Essential parameters
@@ -21,5 +21,4 @@ nextflow run main.nf --studies https://testdata-magda.s3-eu-west-1.amazonaws.com
 **--studies**
 
 List of studies (GWAS summary statistics) to be analyzed (should be a `.csv` file with a header and the path to each study input file, one per line). An example `.csv` can be found in `testdata/list-summary-statistics.csv`.
-
 
