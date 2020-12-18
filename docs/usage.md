@@ -6,24 +6,19 @@ This document provides a detailed guide on how to run the `lifebit-ai/metagwas` 
 
 ## 2 - Usage
 
-This pipeline currently assumes the following:
-- You are analysing 2 studies only
-- The studies are formatted as SAIGE output files
+This pipeline currently assumes all the studies are formatted as SAIGE output files.
 
 ## 3 - Basic example
 
 The typical command for running the pipeline is as follows:
 
 ```
-nextflow run main.nf \
---study_1 testdata/saige_data/saige_results_top_n-1.csv \
---study_2 testdata/saige_data/saige_results_top_n-2.csv
+nextflow run main.nf --studies https://lifebit-featured-datasets.s3-eu-west-1.amazonaws.com/projects/gel/metagwas/list-summary-statistics.csv
 ```
-
-This will launch the pipeline with the `docker` configuration profile.
 
 ## 4 - Essential parameters
 
-## 5 - Other parameters
+**--studies**
 
+List of studies (GWAS summary statistics) to be analyzed (should be a `.csv` file with a header and the path to each study input file, one per line). An example `.csv` can be found in `testdata/list-summary-statistics.csv`.
 

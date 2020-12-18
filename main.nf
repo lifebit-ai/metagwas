@@ -24,12 +24,12 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run main.nf --study_1 testdata/saige_data/saige_results_top_n-1.csv --study_2 testdata/saige_data/saige_results_top_n-2.csv
+    nextflow run main.nf --studies testdata/list-summary-statistics.csv
 
     Mandatory arguments:
-      --study_1 [file]                Path to input SAIGE summary statistics (must be surrounded with quotes)
-      --study_2 [file]                Path to input SAIGE summary statistics (must be surrounded with quotes)
-
+    --studies           list of studies (GWAS summary statistics) to be analyzed 
+                        (should be a .csv file with a header and the name of each file, one per line)
+  
     """.stripIndent()
 }
 
@@ -50,109 +50,30 @@ if (params.help) {
 
 def summary = [:]
 
-if (workflow.revision) summary['Pipeline Release'] = workflow.revision
-
-summary['study_1']          = params.study_1
-summary['study_2']          = params.study_2
-
-summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
-if (workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
-
 summary['Output dir']       = params.outdir
 summary['Launch dir']       = workflow.launchDir
 summary['Working dir']      = workflow.workDir
 summary['Script dir']       = workflow.projectDir
 summary['User']             = workflow.userName
 
-if (workflow.profile.contains('awsbatch')) {
-    summary['AWS Region']   = params.awsregion
-    summary['AWS Queue']    = params.awsqueue
-    summary['AWS CLI']      = params.awscli
-}
+summary['studies']          = params.studies
 
-summary['Config Profile'] = workflow.profile
-if (params.config_profile_description) summary['Config Profile Description'] = params.config_profile_description
-if (params.config_profile_contact)     summary['Config Profile Contact']     = params.config_profile_contact
-if (params.config_profile_url)         summary['Config Profile URL']         = params.config_profile_url
-summary['Config Files'] = workflow.configFiles.join(', ')
-
-if (params.email || params.email_on_fail) {
-    summary['E-mail Address']    = params.email
-    summary['E-mail on failure'] = params.email_on_fail
-    summary['MultiQC maxsize']   = params.max_multiqc_email_size
-}
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
 log.info "-\033[2m--------------------------------------------------\033[0m-"
 
 
 
-/*------------------------------------------------
-  Check the hostnames against configured profiles
---------------------------------------------------*/
-
-// Define checkHostname function
-
-def checkHostname() {
-    def c_reset = params.monochrome_logs ? '' : "\033[0m"
-    def c_white = params.monochrome_logs ? '' : "\033[0;37m"
-    def c_red = params.monochrome_logs ? '' : "\033[1;91m"
-    def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
-    if (params.hostnames) {
-        def hostname = "hostname".execute().text.trim()
-        params.hostnames.each { prof, hnames ->
-            hnames.each { hname ->
-                if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
-                    log.error "====================================================\n" +
-                            "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
-                            "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
-                            "  ${c_yellow_bold}It's highly recommended that you use `-profile $prof${c_reset}`\n" +
-                            "============================================================"
-                }
-            }
-        }
-    }
-}
-
-// Check hostname
-
-checkHostname()
-
-Channel.from(summary.collect{ [it.key, it.value] })
-    .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
-    .reduce { a, b -> return [a, b].join("\n            ") }
-    .map { x -> """
-    id: 'metagwas-summary'
-    description: " - this information is collected when the pipeline is started."
-    section_name: 'lifebit-ai/metagwas Workflow Summary'
-    section_href: 'https://github.com/lifebit-ai/metagwas'
-    plot_type: 'html'
-    data: |
-        <dl class=\"dl-horizontal\">
-            $x
-        </dl>
-    """.stripIndent() }
-    .set { ch_workflow_summary }
-
-
-
-/*---------------------------
-  Setting up input datasets  
------------------------------*/
-
-if (!params.study_1 && !params.study_2) {
-  exit 1, "You have provided not provided 2 studies to run a METAL analysis with. \
-  \nPlease specify 2 studies (SAIGE summary statistics) using --study_1 and --study_2."
-}
+/*----------------------------------
+  Setting up list of input datasets  
+------------------------------------*/
 
 Channel
-  .fromPath(params.study_1, checkIfExists: true)
-  .ifEmpty { exit 1, "Study 1 file not found: ${params.study_1}" }
-  .set { study1_ch }
-
-Channel
-  .fromPath(params.study_2, checkIfExists: true)
-  .ifEmpty { exit 1, "Study 2 file not found: ${params.study_2}" }
-  .set { study2_ch }
+  .fromPath(params.studies, checkIfExists: true)
+  .ifEmpty { exit 1, "List of studies to analyze not found: ${params.studies}" }
+  .splitCsv(header:true)
+  .map{ row -> file(row.study) }
+  .flatten()
+  .set { all_input_studies_ch }
 
 
 
@@ -165,96 +86,103 @@ extra_flags = ""
 
 // 1 - METAL options for describing input files
 
-if ( params.flip ) { extra_flags += " FLIP \n" }
+if ( params.flip ) { extra_flags += "FLIP \n" }
 
 // 2 - METAL options for filtering input files
 
-if ( params.addfilter ) { extra_flags += " ADDFILTER ${params.addfilter}\n" }
-if ( params.removefilters ) { extra_flags += " REMOVEFILTERS  \n" }
+if ( params.addfilter ) { extra_flags += "ADDFILTER ${params.addfilter}\n" }
+if ( params.removefilters ) { extra_flags += "REMOVEFILTERS  \n" }
 
 // 3 - METAL options for sample size weighted meta-analysis
 
-if ( params.weightlabel ) { extra_flags += " WEIGHTLABEL ${params.weightlabel}\n" }
-if ( params.defaultweight ) { extra_flags += " DEFAULTWEIGHT ${params.defaultweight}\n" }
-if ( params.minweight ) { extra_flags += " MINWEIGHT ${params.minweight}\n" }
+if ( params.weightlabel ) { extra_flags += "WEIGHTLABEL ${params.weightlabel}\n" }
+if ( params.defaultweight ) { extra_flags += "DEFAULTWEIGHT ${params.defaultweight}\n" }
+if ( params.minweight ) { extra_flags += "MINWEIGHT ${params.minweight}\n" }
 
 // 4 - METAL options for inverse variance weighted meta-analysis
 
-if ( params.stderrlabel ) { extra_flags += " STDERRLABEL ${params.stderrlabel}\n" }
-if ( params.scheme ) { extra_flags += " SCHEME ${params.scheme}\n" }
+if ( params.stderrlabel ) { extra_flags += "STDERRLABEL ${params.stderrlabel}\n" }
+if ( params.scheme ) { extra_flags += "SCHEME ${params.scheme}\n" }
 
 // 5 - METAL options to enable tracking of allele frequencies
 
-if ( params.averagefreq ) { extra_flags += " AVERAGEFREQ ${params.averagefreq}\n" }
-if ( params.minmaxfreq ) { extra_flags += " MINMAXFREQ ${params.minmaxfreq}\n" }
-if ( params.freqlabel ) { extra_flags += " FREQLABEL ${params.freqlabel}\n" }
+if ( params.averagefreq ) { extra_flags += "AVERAGEFREQ ${params.averagefreq}\n" }
+if ( params.minmaxfreq ) { extra_flags += "MINMAXFREQ ${params.minmaxfreq}\n" }
+if ( params.freqlabel ) { extra_flags += "FREQLABEL ${params.freqlabel}\n" }
 
 // 6 - METAL options to enable tracking of user defined variables
 
-if ( params.customvariable ) { extra_flags += " CUSTOMVARIABLE ${params.customvariable}\n" }
-if ( params.label ) { extra_flags += " LABEL ${params.label}\n" }
+if ( params.customvariable ) { extra_flags += "CUSTOMVARIABLE ${params.customvariable}\n" }
+if ( params.label ) { extra_flags += "LABEL ${params.label}\n" }
 
 // 7 - METAL options to enable explicit strand information
 
-if ( params.usestrand ) { extra_flags += " USESTRAND ${params.usestrand}\n" }
-if ( params.strandlabel ) { extra_flags += " STRANDLABEL ${params.strandlabel}\n"  }
+if ( params.usestrand ) { extra_flags += "USESTRAND ${params.usestrand}\n" }
+if ( params.strandlabel ) { extra_flags += "STRANDLABEL ${params.strandlabel}\n"  }
 
 // 8 - METAL options for automatic genomic control correction of input statistics
 
-if ( params.genomiccontrol ) { extra_flags += " GENOMICCONTROL ${params.genomiccontrol}\n" }
+if ( params.genomiccontrol ) { extra_flags += "GENOMICCONTROL ${params.genomiccontrol}\n" }
 
 // 9 - METAL options for general analysis control  
 
 if ( params.outfile ) { extra_flags += "OUTFILE ${params.outfile}\n"}
-if ( params.maxwarnings ) { extra_flags += " MAXWARNINGS ${params.maxwarnings}\n" }
+if ( params.maxwarnings ) { extra_flags += "MAXWARNINGS ${params.maxwarnings}\n" }
 if ( params.verbose ) { extra_flags += "VERBOSE ${params.verbose}\n"}
-if ( params.logpvalue ) { extra_flags += " LOGPVALUE ${params.logpvalue}\n" }
+if ( params.logpvalue ) { extra_flags += "LOGPVALUE ${params.logpvalue}\n" }
 
-// 10 - METAL options for general run controlnot available (pipeline is not currently developed to handle this)
+// 10 - METAL options for general run control not available (pipeline is not currently developed to handle this)
 
 
 
-/*-----------------------------
+/*------------------------------
   Running METAL (meta-analysis)
--------------------------------*/
+--------------------------------*/
 
-// This process must be "padded to the wall" to allow for extra flags to be properly inserted
+// NB: this process must be "padded to the wall" to allow for extra flags to be properly inserted
 
 process run_metal {
 publishDir "${params.outdir}", mode: "copy"
 
 input:
-file study_1 from study1_ch
-file study_2 from study2_ch
+file(study) from all_input_studies_ch.collect()
 
 output:
 file("METAANALYSIS*") into results_ch
 
 shell:
 '''
-# 1 - Make a METAL script 
+# 1 - Dynamically obtain files to process
+
+touch process_commands.txt
+
+for csv in $(ls *.csv)
+do 
+echo "PROCESS $csv" >> process_commands.txt
+done
+
+process_commands=$(cat process_commands.txt)
+
+# 2 - Make METAL script 
 
 cat > metal_command.txt <<EOF
-# === DESCRIBE AND PROCESS THE FIRST SAIGE INPUT FILE ===
 MARKER SNPID
 ALLELE Allele1 Allele2
 EFFECT BETA
 PVALUE p.value 
 SEPARATOR COMMA
-PROCESS !{study_1}
 !{extra_flags}
+$process_commands
 
-# === THE SECOND INPUT FILE HAS THE SAME FORMAT AND CAN BE PROCESSED IMMEDIATELY ===
-PROCESS !{study_2}
 
 ANALYZE 
 QUIT
 EOF
 
-# - Run METAL
+# 3 - Run METAL
+
 metal metal_command.txt
 '''
-
 }
 
 
