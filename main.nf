@@ -76,6 +76,35 @@ Channel
   .set { all_input_studies_ch }
 
 
+/*-----------------------------
+  Setting up channels for MAMA
+-------------------------------*/
+if (params.mama) {
+  Channel
+    .fromPath(params.ancestry_sample_file, checkIfExists: true)
+    .ifEmpty { exit 1, "Sample file with ancestries not found: ${params.ancestry_sample_file}" }
+    .set { ch_ancestry_sample_file }
+
+  Channel
+    .fromPath(params.snp_ancestry_file, checkIfExists: true)
+    .ifEmpty { exit 1, "SNP file with ancestries not found: ${params.snp_ancestry_file}" }
+    .set { ch_snp_ancestry_file }
+
+  Channel
+    .fromFilePairs(params.merged_ref_panel, size:3, flat : true)
+    .ifEmpty { exit 1, "Ref panel plink files not found: ${params.merged_ref_panel}" }
+    .set { ch_merged_ref_panel }
+
+    Channel
+    .fromPath(params.ss_1)
+    .ifEmpty { exit 1, "Ref panel plink files not found: ${params.merged_ref_panel}" }
+    .set { ch_ss_1 }
+    Channel
+    .fromPath(params.ss_2)
+    .ifEmpty { exit 1, "Ref panel plink files not found: ${params.merged_ref_panel}" }
+    .set { ch_ss_2 }
+}
+
 
 /*-----------------------------
   Setting up extra METAL flags
@@ -186,3 +215,45 @@ metal metal_command.txt
 }
 
 
+if (params.mama) {
+
+  process mama_calculate_ldscores {
+    container 'mama:test'
+    input:
+    file(ancestry_sample_file) from ch_ancestry_sample_file
+    file(snp_ancestry_file) from ch_snp_ancestry_file
+    set val(plink_prefix), file(bed), file(bim), file(fam) from ch_merged_ref_panel
+    output:
+    file("*.l2.ldscore.gz") into ch_mama_ldscores
+    script:
+    """
+    mama_ldscores.py  --ances-path ${ancestry_sample_file} \
+                            --snp-ances ${snp_ancestry_file} \
+                            --ld-wind-cm 1 \
+                            --stream-stdout \
+                            --bfile-merged-path ${plink_prefix} \
+                            --out "chr22_mind02_geno02_maf01_EAS_EUR"
+    """
+  }
+  process run_mama {
+    container 'mama:test'
+    input:
+    file(ss_1) from ch_ss_1
+    file(ss_2) from ch_ss_2
+    file(ld_scores) from ch_mama_ldscores
+
+    output:
+    file("*res") into ch_mama_results
+
+    script:
+    """
+    mama.py --sumstats "${ss_1},EAS,BMI" "${ss_2},EUR,BMI" \
+                   --ld-scores ${ld_scores} \
+                   --out "./BMI_MAMA" \
+                   --add-a1-col-match "EA" \
+                   --add-a2-col-match "OA" \
+                   --out-harmonized
+    """
+
+  }
+}
