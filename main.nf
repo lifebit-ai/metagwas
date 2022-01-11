@@ -174,49 +174,49 @@ if ( params.logpvalue ) { extra_flags += "LOGPVALUE ${params.logpvalue}\n" }
 // NB: this process must be "padded to the wall" to allow for extra flags to be properly inserted
 
 if (params.metal) {
-  process run_metal {
-  publishDir "${params.outdir}", mode: "copy"
 
-  input:
-  file(study) from all_input_studies_ch.collect()
+process run_metal {
+publishDir "${params.outdir}", mode: "copy"
 
-  output:
-  file("METAANALYSIS*") into results_ch
+input:
+file(study) from all_input_studies_ch.collect()
 
-  shell:
-  '''
-  # 1 - Dynamically obtain files to process
+output:
+file("METAANALYSIS*") into results_ch
 
-  touch process_commands.txt
+shell:
+'''
+# 1 - Dynamically obtain files to process
+touch process_commands.txt
 
-  for csv in $(ls *.csv)
-  do 
-  echo "PROCESS $csv" >> process_commands.txt
-  done
+for csv in $(ls *.csv)
+do 
+echo "PROCESS $csv" >> process_commands.txt
+done
 
-  process_commands=$(cat process_commands.txt)
+process_commands=$(cat process_commands.txt)
 
-  # 2 - Make METAL script 
+# 2 - Make METAL script 
 
-  cat > metal_command.txt <<EOF
-  MARKER SNPID
-  ALLELE Allele1 Allele2
-  EFFECT BETA
-  PVALUE p.value 
-  SEPARATOR COMMA
-  !{extra_flags}
-  $process_commands
+cat > metal_command.txt <<EOF
+MARKER SNPID
+ALLELE Allele1 Allele2
+EFFECT BETA
+PVALUE p.value 
+SEPARATOR COMMA
+!{extra_flags}
+$process_commands
 
 
-  ANALYZE 
-  QUIT
-  EOF
+ANALYZE 
+QUIT
+EOF
 
-  # 3 - Run METAL
+# 3 - Run METAL
 
-  metal metal_command.txt
-  '''
-  }
+metal metal_command.txt
+'''
+}
 }
 
 
