@@ -237,7 +237,7 @@ if (params.mama) {
                             --ld-wind-cm 1 \
                             --stream-stdout \
                             --bfile-merged-path ${plink_prefix} \
-                            --out "chr22_mind02_geno02_maf01_EAS_EUR"
+                            --out "ld_scores"
     """
   }
   process run_mama {
@@ -254,7 +254,7 @@ if (params.mama) {
     """
     mama.py --sumstats "${ss_1},${params.ss_1_ancestry},${params.ss_1_trait}" "${ss_2},${params.ss_2_ancestry},${params.ss_2_trait}" \
                    --ld-scores ${ld_scores} \
-                   --out "./BMI_MAMA" \
+                   --out "./${params.mama_output_prefix}" \
                    --add-a1-col-match "EA" \
                    --add-a2-col-match "OA" \
                    --out-harmonized
