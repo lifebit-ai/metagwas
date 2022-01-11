@@ -21,5 +21,8 @@ jobs:
       - name: Basic METAL run with extra flags
         run : |
           nextflow run ${GITHUB_WORKSPACE} -profile flags_test
+      - name: Basic MAMA run with 2 sumstats - EAS, EUR ancestries
+        run : |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_mama
 
 
