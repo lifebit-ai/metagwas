@@ -13,7 +13,7 @@ This pipeline currently assumes all the studies are formatted as SAIGE output fi
 The typical command for running the pipeline is as follows:
 
 ```
-nextflow run main.nf --studies https://lifebit-featured-datasets.s3-eu-west-1.amazonaws.com/projects/gel/metagwas/list-summary-statistics.csv
+nextflow run main.nf --studies https://lifebit-featured-datasets.s3-eu-west-1.amazonaws.com/pipelines/metagwas/list-summary-statistics.csv
 ```
 
 ## 4 - Essential parameters
