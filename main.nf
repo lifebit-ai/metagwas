@@ -61,7 +61,7 @@ summary['studies']          = params.studies
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
 log.info "-\033[2m--------------------------------------------------\033[0m-"
 
-
+projectDir = workflow.projectDir
 
 /*----------------------------------
   Setting up list of input datasets  
@@ -175,48 +175,53 @@ if ( params.logpvalue ) { extra_flags += "LOGPVALUE ${params.logpvalue}\n" }
 
 if (params.metal) {
 
-process run_metal {
-publishDir "${params.outdir}", mode: "copy"
+  process run_metal {
+    publishDir "${params.outdir}", mode: "copy"
 
-input:
-file(study) from all_input_studies_ch.collect()
+    input:
+    file(study) from all_input_studies_ch.collect()
 
-output:
-file("METAANALYSIS*") into results_ch
+    output:
+    file("METAANALYSIS*") into results_ch
 
-shell:
-'''
-# 1 - Dynamically obtain files to process
-touch process_commands.txt
+    shell:
+    '''
+    # 1 - Dynamically obtain files to process
+    touch process_commands.txt
 
-for csv in $(ls *.csv)
-do 
-echo "PROCESS $csv" >> process_commands.txt
-done
+    for csv in $(ls *.csv)
+    do 
+    echo "PROCESSFILE $csv" >> process_commands.txt
+    done
 
-process_commands=$(cat process_commands.txt)
+    process_commands=$(cat process_commands.txt)
 
-# 2 - Make METAL script 
+    # 2 - Make METAL script 
 
-cat > metal_command.txt <<EOF
-MARKER SNPID
-ALLELE Allele1 Allele2
-EFFECT BETA
-PVALUE p.value 
-SEPARATOR COMMA
-!{extra_flags}
-$process_commands
+    cat | sed -r 's/^\\s+//' > metal_command.txt <<EOF
+    MARKER SNPID
+    ALLELE Allele1 Allele2
+    EFFECT BETA
+    PVALUE p.value 
+    SEPARATOR COMMA
+
+    EFFECT_PRINT_PRECISION 12
+    TRACKPOSITIONS ON
+    CHROMOSOMELABEL CHR
+    POSITIONLABEL POS
+    !{extra_flags}
+    $process_commands
 
 
-ANALYZE 
-QUIT
-EOF
+    ANALYZE 
+    QUIT
+    \nEOF
 
-# 3 - Run METAL
+    # 3 - Run METAL
 
-metal metal_command.txt
-'''
-}
+    metal metal_command.txt
+    '''
+  }
 }
 
 
